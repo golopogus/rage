@@ -7,7 +7,7 @@ var s2: segment
 var current: segment
 var foot: segment
 var num_segments
-var total_leg_length = 100
+var total_leg_length
 var anchor
 
 
@@ -61,6 +61,4 @@ func _process(delta: float) -> void:
 		seg_2_foot = seg_2_foot.parent
 		
 	
-	if Input.is_action_pressed("left_click"):
-		print(sin(transformed_foot_angle))
 	

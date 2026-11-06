@@ -10,7 +10,7 @@ var start = false
 
 func _ready() -> void:
 	
-	var left_leg = leg.new(2,Vector2(),100)
+	var left_leg = leg.new(2,Vector2(),500)
 	$legs.add_child(left_leg)
 	#first = segment.new(Vector2((num_segments - 1) * 50,0),Vector2(num_segments * 50,0),50)
 	#first.anchor = Vector2()

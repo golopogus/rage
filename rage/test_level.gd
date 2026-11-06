@@ -1,8 +1,8 @@
 extends Node2D
 
 var s1: segment
-var s2: segment
-var s3: segment
+var right_leg: leg
+var left_leg: leg
 var current: segment
 var first: segment
 var num_segments = 3
@@ -10,40 +10,26 @@ var start = false
 
 func _ready() -> void:
 	
-	var left_leg = leg.new(2,Vector2(),500)
+	left_leg = leg.new(2,Vector2(),100,'left_click')
 	$legs.add_child(left_leg)
-	#first = segment.new(Vector2((num_segments - 1) * 50,0),Vector2(num_segments * 50,0),50)
-	#first.anchor = Vector2()
-	#var max_length = 50
-	#current = first
-	#$points.add_child(current)
-	#for i in num_segments:
-		#var next = segment.new(Vector2(current.point_a.x - 50,0),Vector2(current.point_a.x,0), 50)
-		#max_length += 50
-		#current.child = next
-		#next.parent = current
-		#
-		#current = next
-		#
-		#$points.add_child(next)
-		#if i == num_segments - 1:
-			#next.anchor = next.point_a
-		#first.max_length = max_length
+	
+	right_leg = leg.new(2,Vector2(),100,'right_click')
+	$legs.add_child(right_leg)
+	
+func _process(delta: float) -> void:
+	
+	if Input.is_action_pressed("left_click"):
+		left_leg.active(right_leg.foot.point_b)
+		right_leg.passive(left_leg.groin.point_a)
+		pass
+	
+	if Input.is_action_pressed("right_click"):
+		right_leg.active(left_leg.foot.point_b)
+		left_leg.passive(right_leg.groin.point_a)
+		pass
 		
-
-
-#func _process(delta: float) -> void:
-	#
-	#
-	#var seg_2_parent = current
-	#var seg_2_child = first
-	#while seg_2_child != null:
-		##print(str(seg_2_child.name) + '  point A = ' + str(seg_2_child.point_a) + ', point B = ' + str(seg_2_child.point_b) )
-		#seg_2_child.calc_points_end_2_start()
-		#seg_2_child = seg_2_child.child
-	#while seg_2_parent != null:
-		#seg_2_parent.calc_points_start_2_end()
-		#seg_2_parent = seg_2_parent.parent
+	
+	
 	
 
 	

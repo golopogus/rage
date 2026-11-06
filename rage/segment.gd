@@ -7,10 +7,10 @@ var length = 0
 var parent = null
 var child = null
 var col = Vector3()
-var anchor = null
+var foot_anchor = Vector2()
+var groin_anchor = Vector2()
 var max_length
-var pp1 = Vector2()
-var pp2 = Vector2()
+
 
 func _init(a,b,l) -> void:
 	point_a = a
@@ -18,23 +18,40 @@ func _init(a,b,l) -> void:
 	length = l
 
 
-func calc_points_foot_2_groin():
+func calc_points_foot_2_groin(xx):
 	
 	var dir 
 	if parent != null:
 		point_b = parent.point_a
 	else:
 		var mouse_pos = get_global_mouse_position()
-		if (mouse_pos - anchor).length() <= max_length:
-			point_b = get_global_mouse_position()
-		else:
-			var mouse_dir = (mouse_pos - anchor).normalized()
+		#if (mouse_pos - anchor).length() <= max_length:
+			#if mouse_pos.x > anchor.x and mouse_pos.y > anchor.x:
+				#point_b = mouse_pos
+			
+		#else:
+			#var mouse_dir = (mouse_pos - anchor).normalized()
+			#point_b = mouse_dir * max_length
+		if ((mouse_pos - xx).length() <= max_length * 2 and 
+		(groin_anchor - xx).length() <= max_length):
+			
+			point_b = mouse_pos
+			foot_anchor = point_b
+		
+		elif (groin_anchor - xx).length() <= max_length:
+			var mouse_dir = (mouse_pos - xx).normalized()
 			point_b = mouse_dir * max_length
+			foot_anchor = point_b
+		else:
+			foot_anchor = point_b
+			
+			
 	
 	if child != null:
 		dir = (child.point_b - point_b).normalized()
 	else:
-		dir = (anchor - point_b).normalized()
+		#dir = (anchor - point_b).normalized()
+		dir = (point_a - point_b).normalized()
 	
 	point_a = point_b + dir * length
 	if child != null:
@@ -47,7 +64,10 @@ func calc_points_groin_2_foot():
 	if child != null:
 		point_a = child.point_b
 	else: 
-		point_a = anchor
+		groin_anchor = point_a
+		#anchor = point_a
+		
+		#point_a = anchor
 	
 	if parent != null:
 		dir = (parent.point_a - point_a).normalized()
@@ -56,30 +76,67 @@ func calc_points_groin_2_foot():
 
 	point_b = point_a + length * dir
 	
+	#if parent != null:
+		#check_bend_angle_start()
+
+func calc_points_groin_2_foot_passive(xx):
+	
+	var dir
+	if child != null:
+		point_a = child.point_b
+	else: 
+		point_a = xx
+	
 	if parent != null:
-		check_bend_angle_start()
+		dir = (parent.point_a - point_a).normalized()
+	else:
+		dir = (groin_anchor - point_a).normalized()
+
+	point_b = point_a + length * dir
+	
+	#if parent != null:
+		#check_bend_angle_start()
+
+func calc_points_foot_2_groin_passive(xx):
+	
+	var dir 
+	if parent != null:
+		point_b = parent.point_a
+	else:
+		point_b = foot_anchor
 
 	
-func check_bend_angle():
+	if child != null:
+		dir = (child.point_b - point_b).normalized()
+	else:
+		#dir = (anchor - point_b).normalized()
+		dir = (xx - point_b).normalized()
 	
+	point_a = point_b + dir * length
+	
+	if parent != null:
+		check_bend_angle_start()
+	
+func check_bend_angle():
 	var start = point_b
 	var vertex = (point_a - start).normalized()
 	var end = (child.point_a - start).normalized()
-	var end_angle = atan2(end.y,-end.x) + PI
-	var vertex_angle = atan2(vertex.y,-vertex.x) + PI
-	var transformed_end_angle = end_angle - vertex_angle
-	if transformed_end_angle < 0:
-		transformed_end_angle += 2*PI
-	#if sin(transformed_end_angle) < 0:
-		#
-	#
-		#var new_vertex_angle = transformed_end_angle + end_angle
-		#
-		#var new_vertex_vector = Vector2(cos(new_vertex_angle),sin(new_vertex_angle))
-		#
-		#pp1 = point_a
-		#point_a = start + new_vertex_vector * length
-		#pp2 = point_a
+	var end_angle = atan2(end.y,end.x)
+	var vertex_angle = atan2(vertex.y,vertex.x)
+	
+	var diff = end_angle - vertex_angle
+	
+
+	if sin(diff) > 0:
+		
+		var new_vertex_angle = diff + end_angle
+##
+		var new_vertex_vector = Vector2(cos(new_vertex_angle),sin(new_vertex_angle))
+	
+		##print('knee_angle = ' + str(vertex_angle) + ', foot_angle = ' + str(end_angle) + ', new_vertex_angle = ' + str(new_vertex_angle))
+		##print('knee = ' + str(point_b) + ', foot = ' + str(parent.point_b) + ', start = ' + str(point_a) + ' new_knee = ' + str(point_a + new_vertex_vector * length))
+		point_a = start + new_vertex_vector * length
+		
 		
 	
 #
@@ -88,21 +145,21 @@ func check_bend_angle_start():
 	var start = point_a
 	var vertex = (point_b - start).normalized()
 	var end = (parent.point_b - start).normalized()
-	var end_angle = atan2(end.y,-end.x) + PI
-	var vertex_angle = atan2(vertex.y,-vertex.x) + PI
-	var transformed_end_angle = end_angle - vertex_angle
-	if transformed_end_angle < 0:
-		transformed_end_angle += 2*PI
-	if sin(transformed_end_angle) > 0:
-		#print(sin(transformed_end_angle))
-		var new_vertex_angle = transformed_end_angle + end_angle
-		
+	var end_angle = atan2(end.y,end.x)
+	var vertex_angle = atan2(vertex.y,vertex.x)
 	
+	var diff = end_angle - vertex_angle
+	
+
+	if sin(diff) < 0:
 		#
+		var new_vertex_angle = diff + end_angle
+#
 		var new_vertex_vector = Vector2(cos(new_vertex_angle),sin(new_vertex_angle))
-		print(new_vertex_vector)
 		#
-		#point_b = start + new_vertex_vector * length
+		#print('knee_angle = ' + str(vertex_angle) + ', foot_angle = ' + str(end_angle) + ', new_vertex_angle = ' + str(new_vertex_angle))
+		#print('knee = ' + str(point_b) + ', foot = ' + str(parent.point_b) + ', start = ' + str(point_a) + ' new_knee = ' + str(point_a + new_vertex_vector * length))
+		point_b = start + new_vertex_vector * length
 	
 		
 func _process(delta: float) -> void:
@@ -111,9 +168,9 @@ func _process(delta: float) -> void:
 	
 func _draw() -> void:
 	
-	draw_line(point_a,point_b,Color(col.x,col.y,col.z),20.0)
+	draw_line(point_a,point_b,Color(col.x,col.y,col.z),2.0)
 
-	draw_line(pp1,pp2,Color(1,1,0),10)
+	
 	
 	
 	

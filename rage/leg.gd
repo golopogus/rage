@@ -9,18 +9,21 @@ var foot: segment
 var num_segments
 var total_leg_length
 var anchor
+var input
+var groin: segment
 
 
 
-func _init(num,groin,leg_length) -> void:
+func _init(num,groin,leg_length,inp) -> void:
 	num_segments = num
 	anchor = groin
 	total_leg_length = leg_length
+	input = inp
 	
 
 func _ready() -> void:
 	foot = segment.new(Vector2((num_segments - 1) * (total_leg_length/num_segments),0) + anchor,Vector2(num_segments * (total_leg_length/num_segments),0) + anchor,(total_leg_length/num_segments))
-	foot.anchor = anchor
+	foot.groin_anchor = anchor
 	foot.max_length = total_leg_length
 	current = foot
 	add_child(current)
@@ -31,34 +34,44 @@ func _ready() -> void:
 		current = next
 		add_child(next)
 		if i == num_segments - 2:
-			next.anchor = anchor
+			next.groin_anchor = anchor
+			groin = next
+			
 		
 	
 			
 func _process(delta: float) -> void:
 	
-	var knee_vector = (get_child(1).point_b - anchor).normalized()
-	var foot_vector = (get_child(0).point_b - anchor).normalized()
-	var foot_angle = atan2(foot_vector.y,-foot_vector.x) + PI
-	var knee_angle = atan2(knee_vector.y,-knee_vector.x) + PI
-	var transformed_foot_angle = foot_angle - knee_angle
-	if transformed_foot_angle < 0:
-		transformed_foot_angle += 2*PI
-	var transformed_foot_vector = Vector2(cos(transformed_foot_angle),sin(transformed_foot_angle))
+	pass
+	#if Input.is_action_pressed(input):
+		#var seg_2_foot = current
+		#var seg_2_groin = foot
+		#while seg_2_groin != null:
+			#seg_2_groin.calc_points_foot_2_groin()
+			#seg_2_groin = seg_2_groin.child
+		#while seg_2_foot != null:
+			#seg_2_foot.calc_points_groin_2_foot()
+			#seg_2_foot = seg_2_foot.parent
 	
 	
-	
-	
-	
+func active(pos):
 	
 	var seg_2_foot = current
 	var seg_2_groin = foot
 	while seg_2_groin != null:
-		seg_2_groin.calc_points_foot_2_groin()
+		seg_2_groin.calc_points_foot_2_groin(pos)
 		seg_2_groin = seg_2_groin.child
 	while seg_2_foot != null:
 		seg_2_foot.calc_points_groin_2_foot()
 		seg_2_foot = seg_2_foot.parent
-		
+
+func passive(pos):
 	
-	
+	var seg_2_foot = current
+	var seg_2_groin = foot
+	while seg_2_foot != null:
+		seg_2_foot.calc_points_groin_2_foot_passive(pos)
+		seg_2_foot = seg_2_foot.parent
+	while seg_2_groin != null:
+		seg_2_groin.calc_points_foot_2_groin_passive(pos)
+		seg_2_groin = seg_2_groin.child
